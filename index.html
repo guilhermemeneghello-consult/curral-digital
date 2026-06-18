@@ -1,150 +1,745 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cotação - Personal Banker</title>
-  <style>
-    /* ===== PERSONALIZE AQUI (cores da sua empresa) ===== */
-    :root {
-      --cor-primaria: #0a3d62;   /* cor principal (cabeçalho, botão) */
-      --cor-secundaria: #38ada9; /* cor de destaque */
-      --cor-fundo: #f4f6f8;
-      --cor-texto: #2c3e50;
-    }
-    /* =================================================== */
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#7A3B2E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Curral Digital</title>
+<style>
+  :root{
+    --terra:#7A3B2E;        /* latossolo vermelho */
+    --terra-esc:#5E2C22;
+    --pasto:#46703F;        /* braquiária */
+    --pasto-esc:#33502E;
+    --osso:#F3EEE4;         /* fundo / sebo */
+    --osso-2:#FBF8F2;
+    --carvao:#221C18;
+    --brinco:#E8A33D;       /* tag amarelo */
+    --brinco-esc:#C9851F;
+    --verde:#2E8B57;        /* status ok */
+    --amarelo:#D99A1C;      /* status atenção */
+    --vermelho:#C0392B;     /* status ruim / ladrão */
+    --cinza:#8a8178;
+    --borda:#E2D9C8;
+    --sombra:0 2px 8px rgba(34,28,24,.10);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--osso);color:var(--carvao);
+    font-size:17px;line-height:1.4;-webkit-text-size-adjust:100%;
+    padding-bottom:84px;
+  }
+  /* CABEÇALHO */
+  header{
+    background:linear-gradient(135deg,var(--terra),var(--terra-esc));
+    color:var(--osso-2);padding:14px 16px 12px;position:sticky;top:0;z-index:50;
+    box-shadow:0 2px 10px rgba(0,0,0,.18);
+  }
+  header .marca{display:flex;align-items:center;gap:10px}
+  header .selo{
+    width:34px;height:34px;border-radius:8px;background:var(--brinco);
+    color:var(--terra-esc);font-weight:900;display:flex;align-items:center;justify-content:center;
+    font-size:18px;flex:0 0 auto;box-shadow:inset 0 -2px 0 rgba(0,0,0,.15);
+  }
+  header h1{font-size:18px;margin:0;font-weight:800;letter-spacing:.3px}
+  header .sub{font-size:12px;opacity:.85;margin-top:1px;letter-spacing:.4px;text-transform:uppercase}
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
-    body { background: var(--cor-fundo); color: var(--cor-texto); padding: 16px; }
-    .container { max-width: 520px; margin: 0 auto; background: #fff; border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow: hidden; }
-    .header { background: var(--cor-primaria); color: #fff; text-align: center; padding: 24px 16px; }
-    .header img { max-height: 56px; margin-bottom: 8px; }  /* SEU LOGO AQUI */
-    .header h1 { font-size: 1.3rem; font-weight: 600; }
-    .header p { font-size: 0.85rem; opacity: 0.85; margin-top: 4px; }
-    form { padding: 24px; }
-    .campo { margin-bottom: 16px; }
-    label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; }
-    input, select, textarea { width: 100%; padding: 12px; border: 1px solid #d0d7de;
-      border-radius: 8px; font-size: 0.95rem; }
-    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--cor-secundaria);
-      box-shadow: 0 0 0 3px rgba(56,173,169,0.15); }
-    button { width: 100%; background: var(--cor-primaria); color: #fff; border: none;
-      padding: 14px; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer;
-      transition: background 0.2s; }
-    button:hover { background: var(--cor-secundaria); }
-    button:disabled { opacity: 0.6; cursor: not-allowed; }
-    .resultado { display: none; padding: 24px; text-align: center; }
-    .resultado.ok { display: block; }
-    .protocolo { font-size: 1.6rem; font-weight: 700; color: var(--cor-secundaria);
-      background: var(--cor-fundo); padding: 12px; border-radius: 8px; margin: 16px 0;
-      letter-spacing: 1px; }
-    .erro { color: #c0392b; font-size: 0.85rem; margin-top: 8px; display: none; }
-    .footer { text-align: center; font-size: 0.75rem; color: #888; padding: 12px; }
-    .obrigatorio { color: #c0392b; }
-  </style>
+  main{padding:16px;max-width:680px;margin:0 auto}
+  .view{display:none;animation:fade .18s ease}
+  .view.on{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+  /* HOME */
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px}
+  .acao{
+    border:0;border-radius:16px;padding:20px 14px;color:#fff;text-align:left;
+    box-shadow:var(--sombra);font-size:16px;font-weight:800;line-height:1.15;
+    display:flex;flex-direction:column;gap:10px;min-height:108px;justify-content:space-between;
+  }
+  .acao .ic{font-size:28px}
+  .acao small{font-weight:600;opacity:.9;font-size:12px;display:block;margin-top:2px}
+  .a-entrada{background:linear-gradient(135deg,var(--pasto),var(--pasto-esc))}
+  .a-pesagem{background:linear-gradient(135deg,#3f6f86,#2c4f61)}
+  .a-saida{background:linear-gradient(135deg,var(--brinco-esc),#9c6612)}
+  .a-painel{background:linear-gradient(135deg,var(--terra),var(--terra-esc))}
+  .a-dados{grid-column:1/-1;background:#4a443d;min-height:auto;flex-direction:row;align-items:center;gap:14px}
+  .a-dados .ic{font-size:24px}
+
+  .resumo-home{
+    display:flex;gap:10px;margin:16px 0 4px;
+  }
+  .mini{
+    flex:1;background:var(--osso-2);border:1px solid var(--borda);border-radius:12px;
+    padding:12px 10px;text-align:center;box-shadow:var(--sombra)
+  }
+  .mini .n{font-size:24px;font-weight:900;line-height:1}
+  .mini .l{font-size:11px;color:var(--cinza);margin-top:4px;text-transform:uppercase;letter-spacing:.3px}
+
+  /* TELAS DE FORM */
+  .topo-tela{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+  .voltar{
+    border:0;background:var(--osso-2);border:1px solid var(--borda);border-radius:10px;
+    width:42px;height:42px;font-size:20px;color:var(--terra);flex:0 0 auto;box-shadow:var(--sombra)
+  }
+  .topo-tela h2{font-size:20px;margin:0;font-weight:800}
+
+  .card{
+    background:var(--osso-2);border:1px solid var(--borda);border-radius:16px;
+    padding:16px;box-shadow:var(--sombra);margin-bottom:14px
+  }
+  label{display:block;font-weight:700;font-size:14px;margin:14px 0 6px}
+  label:first-child{margin-top:0}
+  label .dica{font-weight:500;color:var(--cinza);font-size:12px}
+  input,select{
+    width:100%;padding:14px;border:1.5px solid var(--borda);border-radius:12px;
+    font-size:18px;background:#fff;color:var(--carvao);font-family:inherit
+  }
+  input:focus,select:focus{outline:none;border-color:var(--brinco);box-shadow:0 0 0 3px rgba(232,163,61,.25)}
+  .linha{display:flex;gap:10px}
+  .linha>div{flex:1}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+  .chip{
+    border:1.5px solid var(--borda);background:#fff;border-radius:999px;padding:9px 14px;
+    font-size:14px;font-weight:700;color:var(--carvao)
+  }
+  .chip.on{background:var(--pasto);border-color:var(--pasto);color:#fff}
+
+  .btn{
+    width:100%;border:0;border-radius:14px;padding:16px;font-size:17px;font-weight:800;
+    color:#fff;margin-top:8px;box-shadow:var(--sombra)
+  }
+  .btn-verde{background:var(--pasto)}
+  .btn-azul{background:#2c4f61}
+  .btn-amarelo{background:var(--brinco-esc)}
+  .btn-terra{background:var(--terra)}
+  .btn-linha{background:transparent;color:var(--terra);border:1.5px solid var(--borda);box-shadow:none}
+  .btn:active{transform:translateY(1px)}
+
+  .contador{
+    background:var(--pasto-esc);color:#fff;border-radius:12px;padding:12px 14px;
+    font-weight:800;text-align:center;margin-bottom:14px;font-size:15px
+  }
+  .contador b{font-size:20px}
+
+  .aviso{padding:10px 12px;border-radius:10px;font-size:14px;font-weight:600;margin-top:10px}
+  .aviso.ok{background:#E4F1E8;color:#1f6b40}
+  .aviso.err{background:#F8E3E0;color:#a3271b}
+  .aviso.info{background:#FBF1DD;color:#8a5e10}
+
+  /* PAINEL */
+  .kpis{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .kpi{
+    background:var(--osso-2);border:1px solid var(--borda);border-radius:14px;padding:14px;
+    box-shadow:var(--sombra);position:relative;overflow:hidden
+  }
+  .kpi .v{font-size:26px;font-weight:900;line-height:1.05}
+  .kpi .u{font-size:13px;font-weight:700;color:var(--cinza)}
+  .kpi .t{font-size:12px;color:var(--cinza);text-transform:uppercase;letter-spacing:.3px;margin-top:4px}
+  .kpi .meta{font-size:11px;margin-top:6px;font-weight:700}
+  .kpi.full{grid-column:1/-1}
+  .farol{position:absolute;top:12px;right:12px;width:14px;height:14px;border-radius:50%}
+  .f-ok{background:var(--verde)} .f-at{background:var(--amarelo)} .f-ru{background:var(--vermelho)}
+  .txt-ok{color:var(--verde)} .txt-at{color:var(--amarelo)} .txt-ru{color:var(--vermelho)}
+
+  .secao-tit{font-size:15px;font-weight:800;margin:22px 0 10px;display:flex;align-items:center;gap:8px}
+  .secao-tit .badge{background:var(--vermelho);color:#fff;border-radius:999px;font-size:12px;padding:2px 9px}
+
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  .tbl-wrap{background:var(--osso-2);border:1px solid var(--borda);border-radius:14px;overflow:hidden;box-shadow:var(--sombra)}
+  th,td{padding:11px 10px;text-align:left;border-bottom:1px solid var(--borda)}
+  th{background:#efe7d6;font-size:12px;text-transform:uppercase;letter-spacing:.3px;color:#6b6258}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+  tr:last-child td{border-bottom:0}
+  .pt-status{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle}
+
+  .vazio{text-align:center;color:var(--cinza);padding:36px 16px}
+  .vazio .ic{font-size:42px;opacity:.4}
+  .vazio p{margin:10px 0 0;font-weight:600}
+
+  .lista-animal{display:flex;justify-content:space-between;align-items:center;padding:13px 14px;border-bottom:1px solid var(--borda);gap:10px}
+  .lista-animal:last-child{border-bottom:0}
+  .la-id{font-weight:800}
+  .la-sub{font-size:12px;color:var(--cinza)}
+  .la-gmd{text-align:right;font-weight:800;white-space:nowrap}
+  .la-gmd small{display:block;font-size:11px;color:var(--cinza);font-weight:600}
+
+  .rodape-nota{font-size:12px;color:var(--cinza);text-align:center;margin:20px 0 4px;line-height:1.5}
+  .info-sazonal{display:flex;gap:12px;align-items:flex-start;background:#FBF1DD;border:1px solid #EAD9B0;
+    border-radius:14px;padding:14px;margin-top:16px;font-size:13.5px;line-height:1.5;color:#6e5418}
+  .info-sazonal .ic{font-size:22px;flex:0 0 auto;line-height:1.2}
+  .info-sazonal b{color:#5a430f}
+
+  /* NAV INFERIOR */
+  nav{
+    position:fixed;bottom:0;left:0;right:0;background:var(--osso-2);border-top:1px solid var(--borda);
+    display:flex;z-index:60;padding-bottom:env(safe-area-inset-bottom)
+  }
+  nav button{
+    flex:1;border:0;background:transparent;padding:9px 4px 8px;color:var(--cinza);
+    font-size:11px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:3px
+  }
+  nav button .ic{font-size:21px}
+  nav button.on{color:var(--terra)}
+
+  .toast{
+    position:fixed;left:50%;bottom:96px;transform:translateX(-50%) translateY(20px);
+    background:var(--carvao);color:#fff;padding:12px 18px;border-radius:999px;font-weight:700;font-size:14px;
+    opacity:0;pointer-events:none;transition:.25s;z-index:100;box-shadow:0 6px 20px rgba(0,0,0,.3);max-width:90%
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  select.mini-sel{padding:9px 10px;font-size:14px;width:auto;display:inline-block}
+</style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <!-- SUBSTITUA pelo URL do seu logo, ou remova a linha abaixo -->
-      <img src="https://via.placeholder.com/160x56?text=SEU+LOGO" alt="Logo" />
-      <h1>Solicitação de Cotação</h1>
-      <p>Preencha os dados do cliente abaixo</p>
+
+<header>
+  <div class="marca">
+    <div class="selo">🐂</div>
+    <div>
+      <h1>Curral Digital</h1>
+      <div class="sub">Controle de ganho de peso do rebanho</div>
     </div>
-
-    <!-- FORMULÁRIO -->
-    <form id="formCotacao">
-      <div class="campo">
-        <label>Seu nome (funcionário) <span class="obrigatorio">*</span></label>
-        <input type="text" name="funcionario" required />
-      </div>
-      <div class="campo">
-        <label>Nome do cliente <span class="obrigatorio">*</span></label>
-        <input type="text" name="cliente" required />
-      </div>
-      <div class="campo">
-        <label>CPF / CNPJ <span class="obrigatorio">*</span></label>
-        <input type="text" name="documento" required placeholder="000.000.000-00" />
-      </div>
-      <div class="campo">
-        <label>Valor desejado (R$) <span class="obrigatorio">*</span></label>
-        <input type="number" name="valor" required min="0" step="0.01" placeholder="10000" />
-      </div>
-      <div class="campo">
-        <label>Prazo (meses) <span class="obrigatorio">*</span></label>
-        <input type="number" name="prazo" required min="1" placeholder="48" />
-      </div>
-      <div class="campo">
-        <label>Produto de interesse <span class="obrigatorio">*</span></label>
-        <select name="produto" required>
-          <option value="">Selecione...</option>
-          <option>Consignado</option>
-          <option>CDC</option>
-          <option>Crédito Pessoal</option>
-          <option>Financiamento de Veículo</option>
-          <option>Financiamento Imobiliário</option>
-          <option>Outro</option>
-        </select>
-      </div>
-      <div class="campo">
-        <label>Observações (opcional)</label>
-        <textarea name="observacoes" rows="3"></textarea>
-      </div>
-      <button type="submit" id="btnEnviar">Enviar cotação</button>
-      <p class="erro" id="erro">Ocorreu um erro ao enviar. Tente novamente.</p>
-    </form>
-
-    <!-- TELA DE SUCESSO -->
-    <div class="resultado" id="resultado">
-      <h2>✅ Cotação enviada!</h2>
-      <p>Seu número de protocolo é:</p>
-      <div class="protocolo" id="protocolo"></div>
-      <p>Anote este número para acompanhar o retorno.</p>
-      <button onclick="location.reload()" style="margin-top:16px;">Nova cotação</button>
-    </div>
-
-    <div class="footer">Sistema interno de cotações</div>
   </div>
+</header>
 
-  <script>
-    // ===== COLE AQUI O URL DO SEU GOOGLE APPS SCRIPT =====
-    const URL_BACKEND = "COLE_AQUI_A_URL_DO_APPS_SCRIPT";
-    // =====================================================
+<main>
+  <!-- ===== HOME ===== -->
+  <section class="view on" id="v-home">
+    <div class="resumo-home">
+      <div class="mini"><div class="n" id="h-ativos">0</div><div class="l">No pasto</div></div>
+      <div class="mini"><div class="n" id="h-peso">—</div><div class="l">Peso médio</div></div>
+      <div class="mini"><div class="n" id="h-gmd">—</div><div class="l">GMD médio</div></div>
+    </div>
 
-    const form = document.getElementById('formCotacao');
-    const btn = document.getElementById('btnEnviar');
-    const erro = document.getElementById('erro');
+    <div class="grid">
+      <button class="acao a-entrada" onclick="abrir('entrada')">
+        <span class="ic">🐂</span>
+        <span>Entrada<small>Animal chegou na fazenda</small></span>
+      </button>
+      <button class="acao a-pesagem" onclick="abrir('pesagem')">
+        <span class="ic">⚖️</span>
+        <span>Pesagem<small>Pesou no curral</small></span>
+      </button>
+      <button class="acao a-saida" onclick="abrir('saida')">
+        <span class="ic">💰</span>
+        <span>Saída / Venda<small>Animal saiu</small></span>
+      </button>
+      <button class="acao a-painel" onclick="abrir('painel')">
+        <span class="ic">📊</span>
+        <span>Painel<small>Números da fazenda</small></span>
+      </button>
+      <button class="acao a-dados" onclick="abrir('dados')">
+        <span class="ic">📤</span>
+        <span>Exportar e fazer backup<small style="display:inline">Gerar Excel e enviar dados ao consultor</small></span>
+      </button>
+    </div>
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      btn.disabled = true;
-      btn.textContent = 'Enviando...';
-      erro.style.display = 'none';
+    <div class="info-sazonal">
+      <span class="ic">💡</span>
+      <div><b>Lembrete sazonal.</b> O gado ganha mais peso nas <b>águas</b> (out–abr), com o pasto forte. Na <b>seca</b> (mai–set) o ganho cai naturalmente — o proteinado e o pasto deferido são o que impede o boi de <b>perder peso</b>. GMD mais baixo na seca é esperado; o sinal de alerta é o animal emagrecer. A meta do app é fixa em <b>0,6 kg/dia</b> o ano todo, só pra enxergar de relance quem está ganhando bem e quem travou.</div>
+    </div>
 
-      const dados = Object.fromEntries(new FormData(form).entries());
+    <div class="rodape-nota">
+      Os dados ficam salvos neste celular.<br>Faça backup de vez em quando na tela de Exportar.
+    </div>
+  </section>
 
-      try {
-        const resp = await fetch(URL_BACKEND, {
-          method: 'POST',
-          // text/plain evita o "preflight" CORS que o Apps Script não trata bem
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify(dados)
-        });
-        const json = await resp.json();
-        if (json.status === 'ok') {
-          document.getElementById('protocolo').textContent = json.protocolo;
-          form.style.display = 'none';
-          document.getElementById('resultado').classList.add('ok');
-        } else {
-          throw new Error(json.mensagem || 'Erro');
-        }
-      } catch (err) {
-        erro.style.display = 'block';
-        btn.disabled = false;
-        btn.textContent = 'Enviar cotação';
+  <!-- ===== ENTRADA ===== -->
+  <section class="view" id="v-entrada">
+    <div class="topo-tela"><button class="voltar" onclick="abrir('home')">←</button><h2>Entrada de animal</h2></div>
+    <div class="contador">Cadastrados nesta sessão: <b id="c-entrada">0</b></div>
+    <div class="card">
+      <label>Brinco / Identificação <span class="dica">(ou toque em Gerar)</span></label>
+      <div class="linha">
+        <div style="flex:2"><input id="e-brinco" inputmode="numeric" placeholder="Ex: 1234"></div>
+        <div style="flex:0 0 auto"><button class="btn btn-linha" style="margin:0;height:100%;white-space:nowrap;padding:0 14px" onclick="gerarBrinco()">Gerar</button></div>
+      </div>
+
+      <label>Pasto</label>
+      <input id="e-pasto" placeholder="Ex: Pasto 3 / Sede / Baixão">
+      <div class="chips" id="e-pasto-chips"></div>
+
+      <label>Categoria</label>
+      <div class="chips" id="e-categoria">
+        <button class="chip on" data-cat="Bezerro(a)">Bezerro(a)</button>
+        <button class="chip" data-cat="Garrote/Novilha">Garrote/Novilha</button>
+        <button class="chip" data-cat="Boi/Vaca">Boi/Vaca</button>
+        <button class="chip" data-cat="Matriz">Matriz</button>
+      </div>
+
+      <label>Sexo</label>
+      <div class="chips" id="e-sexo">
+        <button class="chip on" data-sx="M">Macho</button>
+        <button class="chip" data-sx="F">Fêmea</button>
+      </div>
+
+      <div class="linha">
+        <div><label>Data de entrada</label><input id="e-data" type="date"></div>
+        <div><label>Peso (kg)</label><input id="e-peso" inputmode="decimal" placeholder="kg"></div>
+      </div>
+
+      <div id="e-aviso"></div>
+      <button class="btn btn-verde" onclick="salvarEntrada()">Salvar e cadastrar próximo</button>
+      <button class="btn btn-linha" onclick="abrir('home')">Concluir</button>
+    </div>
+  </section>
+
+  <!-- ===== PESAGEM ===== -->
+  <section class="view" id="v-pesagem">
+    <div class="topo-tela"><button class="voltar" onclick="abrir('home')">←</button><h2>Pesagem no curral</h2></div>
+    <div class="contador">Pesados nesta sessão: <b id="c-pesagem">0</b></div>
+    <div class="card">
+      <div class="linha">
+        <div><label>Data da pesagem</label><input id="p-data" type="date"></div>
+        <div><label>Pasto <span class="dica">(opcional)</span></label><input id="p-pasto" placeholder="Pasto"></div>
+      </div>
+      <label>Brinco do animal</label>
+      <input id="p-brinco" inputmode="numeric" placeholder="Ex: 1234" autocomplete="off">
+      <label>Peso de hoje (kg)</label>
+      <input id="p-peso" inputmode="decimal" placeholder="kg">
+      <div id="p-aviso"></div>
+      <button class="btn btn-azul" onclick="salvarPesagem()">Salvar e pesar próximo</button>
+      <button class="btn btn-linha" onclick="abrir('home')">Concluir</button>
+    </div>
+    <div class="rodape-nota">Se o brinco ainda não existe, o app cadastra o animal automaticamente com esse peso como entrada.</div>
+  </section>
+
+  <!-- ===== SAÍDA ===== -->
+  <section class="view" id="v-saida">
+    <div class="topo-tela"><button class="voltar" onclick="abrir('home')">←</button><h2>Saída / Venda</h2></div>
+    <div class="card">
+      <label>Brinco do animal que saiu</label>
+      <input id="s-brinco" inputmode="numeric" placeholder="Ex: 1234" autocomplete="off">
+      <div id="s-info"></div>
+      <div class="linha">
+        <div><label>Data de saída</label><input id="s-data" type="date"></div>
+        <div><label>Peso de saída (kg)</label><input id="s-peso" inputmode="decimal" placeholder="kg"></div>
+      </div>
+      <label>Destino</label>
+      <div class="chips" id="s-destino">
+        <button class="chip on" data-dst="Venda/Frigorífico">Venda/Frigorífico</button>
+        <button class="chip" data-dst="Venda/Reposição">Venda/Reposição</button>
+        <button class="chip" data-dst="Morte">Morte</button>
+        <button class="chip" data-dst="Outro">Outro</button>
+      </div>
+      <div id="s-aviso"></div>
+      <button class="btn btn-amarelo" onclick="salvarSaida()">Registrar saída</button>
+      <button class="btn btn-linha" onclick="abrir('home')">Cancelar</button>
+    </div>
+  </section>
+
+  <!-- ===== PAINEL ===== -->
+  <section class="view" id="v-painel">
+    <div class="topo-tela"><button class="voltar" onclick="abrir('home')">←</button><h2>Painel da fazenda</h2></div>
+    <div class="kpis" id="painel-kpis"></div>
+
+    <div class="secao-tit">🚨 Animais abaixo da meta <span class="badge" id="badge-ladrao" style="display:none">0</span></div>
+    <div class="tbl-wrap" id="ladroes"></div>
+
+    <div class="secao-tit">🌿 Desempenho por pasto</div>
+    <div class="tbl-wrap" id="por-pasto"></div>
+
+    <div class="secao-tit">🐂 Todos os animais no pasto</div>
+    <div class="tbl-wrap" id="lista-todos"></div>
+    <div class="rodape-nota">GMD = ganho médio diário (kg/dia), calculado entre a entrada e a última pesagem.<br>@ de carcaça estimada com rendimento de 52%.</div>
+  </section>
+
+  <!-- ===== DADOS ===== -->
+  <section class="view" id="v-dados">
+    <div class="topo-tela"><button class="voltar" onclick="abrir('home')">←</button><h2>Exportar e backup</h2></div>
+
+    <div class="card">
+      <div style="font-weight:800;margin-bottom:4px">📊 Para abrir no Excel</div>
+      <p style="margin:0 0 12px;color:var(--cinza);font-size:14px">Gera planilhas separadas por vírgula que abrem direto no Excel ou Google Sheets.</p>
+      <button class="btn btn-terra" onclick="exportarResumoCSV()">Baixar resumo dos animais</button>
+      <button class="btn btn-linha" onclick="exportarPesagensCSV()">Baixar histórico de pesagens</button>
+    </div>
+
+    <div class="card">
+      <div style="font-weight:800;margin-bottom:4px">📨 Enviar dados ao consultor</div>
+      <p style="margin:0 0 12px;color:var(--cinza);font-size:14px">Gera um arquivo único com tudo. Mande este arquivo pro Guilherme analisar e trazer os insights.</p>
+      <button class="btn btn-azul" onclick="exportarBackup()">Gerar arquivo completo</button>
+    </div>
+
+    <div class="card">
+      <div style="font-weight:800;margin-bottom:4px">♻️ Restaurar backup</div>
+      <p style="margin:0 0 12px;color:var(--cinza);font-size:14px">Trocou de celular? Selecione um arquivo de backup para recuperar os dados.</p>
+      <input type="file" id="import-file" accept=".json" onchange="importarBackup(event)" style="font-size:14px;padding:10px">
+    </div>
+
+    <div class="card" style="border-color:#e7c9c4">
+      <div style="font-weight:800;margin-bottom:4px;color:var(--vermelho)">⚠️ Apagar tudo</div>
+      <p style="margin:0 0 12px;color:var(--cinza);font-size:14px">Remove todos os dados deste celular. Faça backup antes.</p>
+      <button class="btn btn-linha" style="color:var(--vermelho);border-color:#e7c9c4" onclick="apagarTudo()">Apagar todos os dados</button>
+    </div>
+  </section>
+</main>
+
+<nav id="nav">
+  <button data-go="home" class="on" onclick="abrir('home')"><span class="ic">🏠</span>Início</button>
+  <button data-go="pesagem" onclick="abrir('pesagem')"><span class="ic">⚖️</span>Pesar</button>
+  <button data-go="painel" onclick="abrir('painel')"><span class="ic">📊</span>Painel</button>
+  <button data-go="dados" onclick="abrir('dados')"><span class="ic">📤</span>Dados</button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===================== ARMAZENAMENTO ===================== */
+const DB_KEY = 'curralDigital_v1';
+let db = carregar();
+const META = 0.6;        // GMD "bom" (verde) em kg/dia, fixo o ano todo
+const META_MIN = 0.4;    // abaixo disso = animal "ladrão" (prejuízo)
+const ARROBA_KG = 15;                 // 1@ de carcaça = 15 kg
+const RENDIMENTO = 0.52;              // rendimento de carcaça
+
+function carregar(){
+  try{
+    const d = JSON.parse(localStorage.getItem(DB_KEY));
+    if(d && d.animais) return d;
+  }catch(e){}
+  return {animais:[], pesagens:[], config:{}};
+}
+function salvar(){
+  try{ localStorage.setItem(DB_KEY, JSON.stringify(db)); }
+  catch(e){ alert('Não consegui salvar. O armazenamento do celular pode estar cheio.'); }
+}
+
+/* ===================== NAVEGAÇÃO ===================== */
+function abrir(v){
+  document.querySelectorAll('.view').forEach(s=>s.classList.remove('on'));
+  document.getElementById('v-'+v).classList.add('on');
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on', b.dataset.go===v));
+  window.scrollTo(0,0);
+  if(v==='home') atualizarHome();
+  if(v==='painel') renderPainel();
+  if(v==='entrada'){ sessao.entrada=0; document.getElementById('c-entrada').textContent=0; hojeEm('e-data'); renderPastoChips(); }
+  if(v==='pesagem'){ sessao.pesagem=0; document.getElementById('c-pesagem').textContent=0; hojeEm('p-data'); }
+  if(v==='saida'){ hojeEm('s-data'); document.getElementById('s-info').innerHTML=''; }
+}
+let sessao={entrada:0,pesagem:0};
+function hojeEm(id){ document.getElementById(id).value = new Date().toISOString().slice(0,10); }
+
+/* ===================== CHIPS ===================== */
+function ligarChips(containerId){
+  document.getElementById(containerId).addEventListener('click',e=>{
+    const c=e.target.closest('.chip'); if(!c)return;
+    c.parentElement.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));
+    c.classList.add('on');
+  });
+}
+['e-categoria','e-sexo','s-destino'].forEach(ligarChips);
+function chipVal(id,attr){ const el=document.querySelector('#'+id+' .chip.on'); return el?el.dataset[attr]:''; }
+
+function renderPastoChips(){
+  const pastos=[...new Set(db.animais.filter(a=>a.ativo).map(a=>a.pasto).filter(Boolean))].slice(0,8);
+  const box=document.getElementById('e-pasto-chips');
+  box.innerHTML = pastos.map(p=>`<button class="chip" onclick="document.getElementById('e-pasto').value='${p.replace(/'/g,"")}'">${p}</button>`).join('');
+}
+
+/* ===================== TOAST ===================== */
+let toastT;
+function toast(msg){
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+/* ===================== HELPERS ===================== */
+function brincoExiste(b){ return db.animais.find(a=>String(a.brinco)===String(b)); }
+function gerarBrinco(){
+  const nums=db.animais.map(a=>parseInt(a.brinco)).filter(n=>!isNaN(n));
+  const prox=(nums.length?Math.max(...nums):0)+1;
+  document.getElementById('e-brinco').value=prox;
+}
+function numBR(v,casas=0){ return (isNaN(v)||v===null)?'—':Number(v).toLocaleString('pt-BR',{minimumFractionDigits:casas,maximumFractionDigits:casas}); }
+function diasEntre(d1,d2){ return Math.max(0,Math.round((new Date(d2)-new Date(d1))/86400000)); }
+
+/* pontos de peso de um animal: entrada + pesagens (+ saída) ordenados */
+function pontos(a){
+  let p=[{data:a.dataEntrada, peso:+a.pesoEntrada}];
+  db.pesagens.filter(x=>String(x.brinco)===String(a.brinco)).forEach(x=>p.push({data:x.data,peso:+x.peso}));
+  if(!a.ativo && a.pesoSaida) p.push({data:a.dataSaida, peso:+a.pesoSaida});
+  return p.filter(x=>x.peso>0 && x.data).sort((x,y)=>new Date(x.data)-new Date(y.data));
+}
+function metrica(a){
+  const p=pontos(a);
+  const pAtual=p[p.length-1].peso, pIni=p[0].peso;
+  const dias=diasEntre(p[0].data, p[p.length-1].data);
+  const gmdTotal = dias>0 ? (pAtual-pIni)/dias : null;
+  // gmd recente entre os 2 últimos pontos
+  let gmdRec=gmdTotal;
+  if(p.length>=2){ const a2=p[p.length-2], b2=p[p.length-1]; const d=diasEntre(a2.data,b2.data); if(d>0) gmdRec=(b2.peso-a2.peso)/d; }
+  const arrobas = pAtual*RENDIMENTO/ARROBA_KG;
+  return {pAtual,pIni,dias,gmdTotal,gmdRec,arrobas,nPesagens:p.length};
+}
+function statusGMD(g){
+  if(g===null||isNaN(g)) return 'at';
+  if(g<META_MIN) return 'ru';
+  if(g<META) return 'at';
+  return 'ok';
+}
+
+/* ===================== ENTRADA ===================== */
+function salvarEntrada(){
+  const brinco=document.getElementById('e-brinco').value.trim();
+  const pasto=document.getElementById('e-pasto').value.trim();
+  const peso=parseFloat(document.getElementById('e-peso').value.replace(',','.'));
+  const data=document.getElementById('e-data').value;
+  const av=document.getElementById('e-aviso');
+  if(!brinco){ av.innerHTML='<div class="aviso err">Informe o brinco ou toque em Gerar.</div>'; return; }
+  if(brincoExiste(brinco)){ av.innerHTML='<div class="aviso err">Brinco '+brinco+' já existe. Use outro número.</div>'; return; }
+  if(!peso||peso<=0){ av.innerHTML='<div class="aviso err">Informe o peso de entrada.</div>'; return; }
+  if(!data){ av.innerHTML='<div class="aviso err">Informe a data.</div>'; return; }
+  db.animais.push({
+    brinco, pasto, categoria:chipVal('e-categoria','cat'), sexo:chipVal('e-sexo','sx'),
+    dataEntrada:data, pesoEntrada:peso, ativo:true, dataSaida:'', pesoSaida:'', destino:''
+  });
+  salvar();
+  sessao.entrada++; document.getElementById('c-entrada').textContent=sessao.entrada;
+  av.innerHTML='<div class="aviso ok">✓ Brinco '+brinco+' cadastrado ('+peso+' kg).</div>';
+  document.getElementById('e-brinco').value='';
+  document.getElementById('e-peso').value='';
+  document.getElementById('e-brinco').focus();
+  renderPastoChips();
+}
+
+/* ===================== PESAGEM ===================== */
+function salvarPesagem(){
+  const brinco=document.getElementById('p-brinco').value.trim();
+  const peso=parseFloat(document.getElementById('p-peso').value.replace(',','.'));
+  const data=document.getElementById('p-data').value;
+  const pasto=document.getElementById('p-pasto').value.trim();
+  const av=document.getElementById('p-aviso');
+  if(!brinco){ av.innerHTML='<div class="aviso err">Informe o brinco.</div>'; return; }
+  if(!peso||peso<=0){ av.innerHTML='<div class="aviso err">Informe o peso.</div>'; return; }
+  if(!data){ av.innerHTML='<div class="aviso err">Informe a data.</div>'; return; }
+
+  let a=brincoExiste(brinco);
+  let extra='';
+  if(!a){
+    db.animais.push({brinco,pasto:pasto||'(definir)',categoria:'(definir)',sexo:'',dataEntrada:data,pesoEntrada:peso,ativo:true,dataSaida:'',pesoSaida:'',destino:''});
+    extra=' (novo animal cadastrado)';
+  }else{
+    if(pasto && pasto!==a.pasto){ a.pasto=pasto; } // atualiza pasto atual
+    db.pesagens.push({brinco,data,peso});
+    // mostra GMD na hora
+    const m=metrica(a); const st=statusGMD(m.gmdRec);
+    const cor=st==='ok'?'ok':(st==='at'?'info':'err');
+    extra=' · GMD '+numBR(m.gmdRec,2)+' kg/dia';
+    av.innerHTML='<div class="aviso '+cor+'">✓ '+brinco+': '+peso+' kg'+extra+(st==='ru'?' ⚠️ abaixo da meta':'')+'</div>';
+  }
+  salvar();
+  sessao.pesagem++; document.getElementById('c-pesagem').textContent=sessao.pesagem;
+  if(!a) av.innerHTML='<div class="aviso ok">✓ '+brinco+': '+peso+' kg'+extra+'</div>';
+  document.getElementById('p-brinco').value='';
+  document.getElementById('p-peso').value='';
+  document.getElementById('p-brinco').focus();
+}
+
+/* mostra info ao digitar brinco na saída */
+document.getElementById('s-brinco').addEventListener('input',e=>{
+  const a=brincoExiste(e.target.value.trim());
+  const box=document.getElementById('s-info');
+  if(a && a.ativo){
+    const m=metrica(a);
+    box.innerHTML='<div class="aviso info">'+a.categoria+' · pasto '+(a.pasto||'—')+' · entrou com '+a.pesoEntrada+' kg · hoje ~'+numBR(m.pAtual)+' kg · '+numBR(m.arrobas,1)+' @</div>';
+  }else if(a && !a.ativo){
+    box.innerHTML='<div class="aviso err">Esse animal já saiu em '+a.dataSaida+'.</div>';
+  }else{ box.innerHTML=''; }
+});
+
+/* ===================== SAÍDA ===================== */
+function salvarSaida(){
+  const brinco=document.getElementById('s-brinco').value.trim();
+  const peso=parseFloat(document.getElementById('s-peso').value.replace(',','.'));
+  const data=document.getElementById('s-data').value;
+  const av=document.getElementById('s-aviso');
+  const a=brincoExiste(brinco);
+  if(!a){ av.innerHTML='<div class="aviso err">Brinco não encontrado.</div>'; return; }
+  if(!a.ativo){ av.innerHTML='<div class="aviso err">Esse animal já saiu.</div>'; return; }
+  if(!peso||peso<=0){ av.innerHTML='<div class="aviso err">Informe o peso de saída.</div>'; return; }
+  if(!data){ av.innerHTML='<div class="aviso err">Informe a data.</div>'; return; }
+  a.ativo=false; a.dataSaida=data; a.pesoSaida=peso; a.destino=chipVal('s-destino','dst');
+  salvar();
+  const m=metrica(a);
+  toast('✓ '+brinco+' registrado · GMD '+numBR(m.gmdTotal,2)+' kg/dia');
+  document.getElementById('s-brinco').value=''; document.getElementById('s-peso').value='';
+  document.getElementById('s-info').innerHTML=''; av.innerHTML='';
+  abrir('home');
+}
+
+/* ===================== HOME ===================== */
+function atualizarHome(){
+  const ativos=db.animais.filter(a=>a.ativo);
+  document.getElementById('h-ativos').textContent=ativos.length;
+  if(ativos.length){
+    const ms=ativos.map(metrica);
+    const pesoMed=ms.reduce((s,m)=>s+m.pAtual,0)/ms.length;
+    const gmds=ms.map(m=>m.gmdTotal).filter(g=>g!==null&&!isNaN(g));
+    const gmdMed=gmds.length?gmds.reduce((s,g)=>s+g,0)/gmds.length:null;
+    document.getElementById('h-peso').textContent=numBR(pesoMed)+'kg';
+    document.getElementById('h-gmd').textContent=gmdMed!==null?numBR(gmdMed,2):'—';
+  }else{
+    document.getElementById('h-peso').textContent='—';
+    document.getElementById('h-gmd').textContent='—';
+  }
+}
+
+/* ===================== PAINEL ===================== */
+function renderPainel(){
+  const ativos=db.animais.filter(a=>a.ativo);
+  const vendidos=db.animais.filter(a=>!a.ativo);
+  const kpiBox=document.getElementById('painel-kpis');
+
+  if(!db.animais.length){
+    kpiBox.innerHTML='';
+    document.getElementById('ladroes').innerHTML=vazio('Sem dados ainda','Cadastre entradas e pesagens.');
+    document.getElementById('por-pasto').innerHTML='';
+    document.getElementById('lista-todos').innerHTML='';
+    return;
+  }
+
+  const ms=ativos.map(a=>({a,m:metrica(a)}));
+  const pesoMed=ms.length?ms.reduce((s,x)=>s+x.m.pAtual,0)/ms.length:0;
+  const arrMed=ms.length?ms.reduce((s,x)=>s+x.m.arrobas,0)/ms.length:0;
+  const gmds=ms.map(x=>x.m.gmdTotal).filter(g=>g!==null&&!isNaN(g));
+  const gmdMed=gmds.length?gmds.reduce((s,g)=>s+g,0)/gmds.length:null;
+  const stMed=statusGMD(gmdMed);
+  const ladroes=ms.filter(x=>x.m.gmdTotal!==null && x.m.gmdTotal<META_MIN && x.m.nPesagens>=2);
+  const semPesagem=ms.filter(x=>x.m.nPesagens<2).length;
+
+  const metaTxt='Meta: '+numBR(META,1)+' kg/dia';
+  kpiBox.innerHTML=`
+    <div class="kpi"><div class="v">${ativos.length}</div><div class="u">cabeças</div><div class="t">No pasto</div></div>
+    <div class="kpi"><div class="v">${numBR(pesoMed)}</div><div class="u">kg</div><div class="t">Peso médio</div></div>
+    <div class="kpi"><span class="farol f-${stMed}"></span><div class="v txt-${stMed}">${gmdMed!==null?numBR(gmdMed,2):'—'}</div><div class="u">kg/dia</div><div class="t">GMD médio</div><div class="meta txt-${stMed}">${metaTxt}</div></div>
+    <div class="kpi"><div class="v">${numBR(arrMed,1)}</div><div class="u">@</div><div class="t">Arroba média (carcaça est.)</div></div>
+    <div class="kpi full" style="background:${ladroes.length?'#FBEAE7':'#E9F2EC'}">
+      <span class="farol ${ladroes.length?'f-ru':'f-ok'}"></span>
+      <div class="v ${ladroes.length?'txt-ru':'txt-ok'}">${ladroes.length}</div>
+      <div class="t">Animais abaixo de ${numBR(META_MIN,1)} kg/dia — estão custando dinheiro${semPesagem?' · '+semPesagem+' sem 2ª pesagem':''}</div>
+    </div>`;
+
+  // Ladrões
+  const badge=document.getElementById('badge-ladrao');
+  if(ladroes.length){ badge.style.display='inline-block'; badge.textContent=ladroes.length; }
+  else badge.style.display='none';
+  document.getElementById('ladroes').innerHTML = ladroes.length
+    ? ladroes.sort((a,b)=>a.m.gmdTotal-b.m.gmdTotal).map(x=>linhaAnimal(x.a,x.m)).join('')
+    : '<div class="vazio" style="padding:22px"><div class="ic">✅</div><p>Nenhum animal abaixo da meta mínima.</p></div>';
+
+  // Por pasto
+  const pastos={};
+  ms.forEach(x=>{ const p=x.a.pasto||'(sem pasto)'; (pastos[p]=pastos[p]||[]).push(x.m); });
+  let linhasP=Object.entries(pastos).map(([p,arr])=>{
+    const n=arr.length;
+    const pm=arr.reduce((s,m)=>s+m.pAtual,0)/n;
+    const gs=arr.map(m=>m.gmdTotal).filter(g=>g!==null&&!isNaN(g));
+    const gm=gs.length?gs.reduce((s,g)=>s+g,0)/gs.length:null;
+    const st=statusGMD(gm);
+    return `<tr><td><span class="pt-status f-${st}" style="background:var(--${st==='ok'?'verde':st==='at'?'amarelo':'vermelho'})"></span>${p}</td><td class="num">${n}</td><td class="num">${numBR(pm)}</td><td class="num txt-${st}">${gm!==null?numBR(gm,2):'—'}</td></tr>`;
+  }).join('');
+  document.getElementById('por-pasto').innerHTML=
+    '<table><thead><tr><th>Pasto</th><th class="num">Cab.</th><th class="num">Peso méd</th><th class="num">GMD</th></tr></thead><tbody>'+linhasP+'</tbody></table>';
+
+  // Lista todos
+  document.getElementById('lista-todos').innerHTML =
+    ms.sort((a,b)=>(a.m.gmdTotal??9)-(b.m.gmdTotal??9)).map(x=>linhaAnimal(x.a,x.m)).join('');
+}
+
+function linhaAnimal(a,m){
+  const st=statusGMD(m.gmdTotal);
+  const cor=st==='ok'?'txt-ok':(st==='at'?'txt-at':'txt-ru');
+  const gmdTxt=(m.gmdTotal!==null&&!isNaN(m.gmdTotal))?numBR(m.gmdTotal,2):'—';
+  const aviso=m.nPesagens<2?'<small>pese de novo p/ ver GMD</small>':'<small>'+numBR(m.pAtual)+' kg · '+numBR(m.arrobas,1)+'@</small>';
+  return `<div class="lista-animal">
+    <div><div class="la-id"><span class="pt-status" style="background:var(--${st==='ok'?'verde':st==='at'?'amarelo':'vermelho'})"></span>Brinco ${a.brinco}</div>
+    <div class="la-sub">${a.pasto||'—'} · ${m.dias} dias</div></div>
+    <div class="la-gmd ${cor}">${gmdTxt}<small>kg/dia</small></div></div>`;
+}
+function vazio(t,s){ return '<div class="vazio"><div class="ic">📭</div><p>'+t+'</p><div class="la-sub">'+s+'</div></div>'; }
+
+/* ===================== EXPORTAÇÃO ===================== */
+function baixar(nome, conteudo, tipo){
+  const blob=new Blob(['\ufeff'+conteudo],{type:tipo}); // BOM p/ acento no Excel
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download=nome; document.body.appendChild(a); a.click();
+  setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url);},500);
+}
+function csvLinha(arr){ return arr.map(c=>{ let s=String(c==null?'':c); if(/[;"\n]/.test(s)) s='"'+s.replace(/"/g,'""')+'"'; return s; }).join(';'); }
+function dataArq(){ return new Date().toISOString().slice(0,10).replace(/-/g,''); }
+
+function exportarResumoCSV(){
+  if(!db.animais.length) return toast('Sem dados para exportar.');
+  const cab=['Brinco','Pasto','Categoria','Sexo','Status','Data entrada','Peso entrada (kg)','Ultima data','Peso atual (kg)','Dias','Pesagens','GMD total (kg/dia)','GMD recente (kg/dia)','Ganho total (kg)','Arroba carcaca est (@)','Data saida','Peso saida (kg)','Destino'];
+  const linhas=db.animais.map(a=>{
+    const m=metrica(a);
+    return csvLinha([a.brinco,a.pasto,a.categoria,a.sexo,a.ativo?'No pasto':'Saiu',a.dataEntrada,
+      brBR(a.pesoEntrada), pontos(a).slice(-1)[0].data, brBR(m.pAtual), m.dias, m.nPesagens,
+      brBR(m.gmdTotal,2), brBR(m.gmdRec,2), brBR(m.pAtual-m.pIni,1), brBR(m.arrobas,2),
+      a.dataSaida, brBR(a.pesoSaida), a.destino]);
+  });
+  baixar('animais_'+dataArq()+'.csv', csvLinha(cab)+'\n'+linhas.join('\n'), 'text/csv;charset=utf-8');
+  toast('Planilha de animais gerada ✓');
+}
+function exportarPesagensCSV(){
+  const cab=['Brinco','Data','Peso (kg)','Tipo'];
+  let regs=[];
+  db.animais.forEach(a=>{
+    regs.push({b:a.brinco,d:a.dataEntrada,p:a.pesoEntrada,t:'Entrada'});
+    if(!a.ativo&&a.pesoSaida) regs.push({b:a.brinco,d:a.dataSaida,p:a.pesoSaida,t:'Saida'});
+  });
+  db.pesagens.forEach(x=>regs.push({b:x.brinco,d:x.data,p:x.peso,t:'Pesagem'}));
+  if(!regs.length) return toast('Sem pesagens para exportar.');
+  regs.sort((a,b)=>String(a.b).localeCompare(String(b.b))||new Date(a.d)-new Date(b.d));
+  const linhas=regs.map(r=>csvLinha([r.b,r.d,brBR(r.p),r.t]));
+  baixar('pesagens_'+dataArq()+'.csv', csvLinha(cab)+'\n'+linhas.join('\n'),'text/csv;charset=utf-8');
+  toast('Histórico de pesagens gerado ✓');
+}
+function brBR(v,casas=0){ if(v===''||v==null||isNaN(v))return ''; return Number(v).toFixed(casas).replace('.',','); }
+
+function exportarBackup(){
+  const pacote={app:'Curral Digital', versao:2, geradoEm:new Date().toISOString(), dados:db};
+  baixar('backup_curral_'+dataArq()+'.json', JSON.stringify(pacote,null,2),'application/json');
+  toast('Arquivo completo gerado ✓');
+}
+function importarBackup(ev){
+  const f=ev.target.files[0]; if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const p=JSON.parse(r.result);
+      const d=p.dados||p;
+      if(!d.animais) throw 0;
+      if(confirm('Isso vai substituir os dados atuais deste celular. Continuar?')){
+        db=d; salvar(); atualizarHome();
+        toast('Backup restaurado ✓'); abrir('home');
       }
-    });
-  </script>
+    }catch(e){ alert('Arquivo inválido.'); }
+    ev.target.value='';
+  };
+  r.readAsText(f);
+}
+function apagarTudo(){
+  if(confirm('Apagar TODOS os dados deste celular? Não dá pra desfazer.')){
+    if(confirm('Tem certeza mesmo? Faça backup antes se ainda não fez.')){
+      db={animais:[],pesagens:[],config:{}}; salvar(); atualizarHome(); abrir('home'); toast('Dados apagados.');
+    }
+  }
+}
+
+/* enter avança nos formulários de digitação rápida */
+['e-peso','p-peso'].forEach(id=>{
+  document.getElementById(id).addEventListener('keydown',e=>{ if(e.key==='Enter'){ id==='e-peso'?salvarEntrada():salvarPesagem(); }});
+});
+
+/* INÍCIO */
+atualizarHome();
+</script>
 </body>
 </html>
