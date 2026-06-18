@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cotação - Personal Banker</title>
+  <style>
+    /* ===== PERSONALIZE AQUI (cores da sua empresa) ===== */
+    :root {
+      --cor-primaria: #0a3d62;   /* cor principal (cabeçalho, botão) */
+      --cor-secundaria: #38ada9; /* cor de destaque */
+      --cor-fundo: #f4f6f8;
+      --cor-texto: #2c3e50;
+    }
+    /* =================================================== */
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
+    body { background: var(--cor-fundo); color: var(--cor-texto); padding: 16px; }
+    .container { max-width: 520px; margin: 0 auto; background: #fff; border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow: hidden; }
+    .header { background: var(--cor-primaria); color: #fff; text-align: center; padding: 24px 16px; }
+    .header img { max-height: 56px; margin-bottom: 8px; }  /* SEU LOGO AQUI */
+    .header h1 { font-size: 1.3rem; font-weight: 600; }
+    .header p { font-size: 0.85rem; opacity: 0.85; margin-top: 4px; }
+    form { padding: 24px; }
+    .campo { margin-bottom: 16px; }
+    label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 6px; }
+    input, select, textarea { width: 100%; padding: 12px; border: 1px solid #d0d7de;
+      border-radius: 8px; font-size: 0.95rem; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--cor-secundaria);
+      box-shadow: 0 0 0 3px rgba(56,173,169,0.15); }
+    button { width: 100%; background: var(--cor-primaria); color: #fff; border: none;
+      padding: 14px; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer;
+      transition: background 0.2s; }
+    button:hover { background: var(--cor-secundaria); }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+    .resultado { display: none; padding: 24px; text-align: center; }
+    .resultado.ok { display: block; }
+    .protocolo { font-size: 1.6rem; font-weight: 700; color: var(--cor-secundaria);
+      background: var(--cor-fundo); padding: 12px; border-radius: 8px; margin: 16px 0;
+      letter-spacing: 1px; }
+    .erro { color: #c0392b; font-size: 0.85rem; margin-top: 8px; display: none; }
+    .footer { text-align: center; font-size: 0.75rem; color: #888; padding: 12px; }
+    .obrigatorio { color: #c0392b; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <!-- SUBSTITUA pelo URL do seu logo, ou remova a linha abaixo -->
+      <img src="https://via.placeholder.com/160x56?text=SEU+LOGO" alt="Logo" />
+      <h1>Solicitação de Cotação</h1>
+      <p>Preencha os dados do cliente abaixo</p>
+    </div>
+
+    <!-- FORMULÁRIO -->
+    <form id="formCotacao">
+      <div class="campo">
+        <label>Seu nome (funcionário) <span class="obrigatorio">*</span></label>
+        <input type="text" name="funcionario" required />
+      </div>
+      <div class="campo">
+        <label>Nome do cliente <span class="obrigatorio">*</span></label>
+        <input type="text" name="cliente" required />
+      </div>
+      <div class="campo">
+        <label>CPF / CNPJ <span class="obrigatorio">*</span></label>
+        <input type="text" name="documento" required placeholder="000.000.000-00" />
+      </div>
+      <div class="campo">
+        <label>Valor desejado (R$) <span class="obrigatorio">*</span></label>
+        <input type="number" name="valor" required min="0" step="0.01" placeholder="10000" />
+      </div>
+      <div class="campo">
+        <label>Prazo (meses) <span class="obrigatorio">*</span></label>
+        <input type="number" name="prazo" required min="1" placeholder="48" />
+      </div>
+      <div class="campo">
+        <label>Produto de interesse <span class="obrigatorio">*</span></label>
+        <select name="produto" required>
+          <option value="">Selecione...</option>
+          <option>Consignado</option>
+          <option>CDC</option>
+          <option>Crédito Pessoal</option>
+          <option>Financiamento de Veículo</option>
+          <option>Financiamento Imobiliário</option>
+          <option>Outro</option>
+        </select>
+      </div>
+      <div class="campo">
+        <label>Observações (opcional)</label>
+        <textarea name="observacoes" rows="3"></textarea>
+      </div>
+      <button type="submit" id="btnEnviar">Enviar cotação</button>
+      <p class="erro" id="erro">Ocorreu um erro ao enviar. Tente novamente.</p>
+    </form>
+
+    <!-- TELA DE SUCESSO -->
+    <div class="resultado" id="resultado">
+      <h2>✅ Cotação enviada!</h2>
+      <p>Seu número de protocolo é:</p>
+      <div class="protocolo" id="protocolo"></div>
+      <p>Anote este número para acompanhar o retorno.</p>
+      <button onclick="location.reload()" style="margin-top:16px;">Nova cotação</button>
+    </div>
+
+    <div class="footer">Sistema interno de cotações</div>
+  </div>
+
+  <script>
+    // ===== COLE AQUI O URL DO SEU GOOGLE APPS SCRIPT =====
+    const URL_BACKEND = "COLE_AQUI_A_URL_DO_APPS_SCRIPT";
+    // =====================================================
+
+    const form = document.getElementById('formCotacao');
+    const btn = document.getElementById('btnEnviar');
+    const erro = document.getElementById('erro');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      btn.disabled = true;
+      btn.textContent = 'Enviando...';
+      erro.style.display = 'none';
+
+      const dados = Object.fromEntries(new FormData(form).entries());
+
+      try {
+        const resp = await fetch(URL_BACKEND, {
+          method: 'POST',
+          // text/plain evita o "preflight" CORS que o Apps Script não trata bem
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(dados)
+        });
+        const json = await resp.json();
+        if (json.status === 'ok') {
+          document.getElementById('protocolo').textContent = json.protocolo;
+          form.style.display = 'none';
+          document.getElementById('resultado').classList.add('ok');
+        } else {
+          throw new Error(json.mensagem || 'Erro');
+        }
+      } catch (err) {
+        erro.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Enviar cotação';
+      }
+    });
+  </script>
+</body>
+</html>
